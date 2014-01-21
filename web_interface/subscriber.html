@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+        <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+        <title>QCBot Screen</title>
+        <style type="text/css">
+          video{
+            position:fixed;
+            right:0;
+            bottom:0;
+            /*min-width:100%;*/
+            min-height:100%;
+            width:auto;
+            height:auto;
+            z-index:-100;
+            /*background-size:cover;*/
+          }
+        </style>
+    </head>
+    <body>
+        
+        <video id="vidPlayer" autoplay loop>
+            <source src="assets/None.mp4" type="video/mp4"/>
+        </video>
+        <script type="text/javascript" type="text/javascript">
+            var videoForState = {"Back Up":"close_up_backup.mp4", "Obstacle":"forward_drive_person_appears_behind.mp4", "Turn Corner":"right_turn_into_room.mp4", "None":"None"};
+            
+            $(document).ready(function(){
+                var myVideo = document.getElementById('vidPlayer');
+                var ros = new ROSLIB.Ros({
+                    url : 'ws://localhost:9090'
+                });
+    
+                 var listener = new ROSLIB.Topic({
+                     ros : ros,
+                     name : '/qcbot_scenario_triggers',
+                     messageType : 'led_keepon/ScenarioTrigger'
+                 });
+                listener.subscribe(function(message) {
+                    console.log(message);
+                    loadAnotherVideo(message.scenario, myVideo);
+                });
+            });
+            
+            
+            function loadAnotherVideo(robotState, myVideo) {
+                var video = document.getElementsByTagName('video')[0];
+                var sources = video.getElementsByTagName('source');
+                
+                sources[0].src = videoForState[robotState];
+                console.log(videoForState[robotState]);
+                video.load();
+                play(myVideo);
+                console.log("Playing next video");
+            }
+            
+            function play(myVideo){
+                if(myVideo.paused)
+                    myVideo.play();
+            }
+            
+            function playPause(myVideo)
+            {
+                if (myVideo.paused) 
+                  myVideo.play(); 
+                else 
+                  myVideo.pause(); 
+            } 
+        </script>
+    </body>
+</html>

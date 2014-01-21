@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+        <link href="bootstrap/css/bootstrap.css" rel="stylesheet"/>
+        <link href="bootstrap/css/bootstrap-theme.css" rel="stylesheet"/>
+        <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+        <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+    
+        
+        <title>QCBot Scenario Trigger</title>
+    </head>
+    
+    <body>
+        
+        
+        <div class="container">
+            <div class="row">
+                <h1>QCBot Scenario Trigger</h1>
+            </div>
+            <div class="row">
+                <h3><span class="label label-default">Scenario</span></h3>
+            </div>
+            <div class="row">
+                <div class="radio-inline col-md-1">
+                    <label>
+                        <input type="radio" name="radGroupScenarios" id="radTurnCorner" value="Turn Corner">
+                        Turn Corner
+                    </label>
+                </div>    
+                <div class="radio-inline col-md-1">
+                    <label>
+                        <input type="radio" name="radGroupScenarios" id="radBackUp" value="Back Up">
+                        Back Up
+                    </label>
+                </div>
+                <div class="radio-inline col-md-1">
+                    <label>
+                        <input type="radio" name="radGroupScenarios" id="radBrake" value="Brake">
+                        Brake
+                    </label>
+                </div>
+                <div class="radio-inline col-md-1">
+                    <label>
+                        <input type="radio" name="radGroupScenarios" id="radObstacle" value="Obstacle">
+                        Obstacle
+                    </label>
+                </div>
+                <div class="radio-inline col-md-1">
+                    <label>
+                        <input type="radio" name="radGroupScenarios" id="radNone" value="None" checked>
+                        None
+                    </label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-group col-md-3">
+                    <span class="input-group-addon" id="lblParameter">None</span>
+                    <input type="text" class="form-control" id="txtParameter">
+                </div>
+            </div>
+            <div class="row col-md-offset-3">
+                <button class="btn btn-success" id="btnCreateScenario">Create Scenario</button>
+            </div>
+        </div>
+        
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script src="bootstrap/js/bootstrap.js"></script>
+        
+        <script type="text/javascript" type="text/javascript">
+            var formState = {radState:"None", buttonEnabled:true};    
+            var ros = new ROSLIB.Ros({ url : 'ws://localhost:9090' });
+            var topic = new ROSLIB.Topic({ ros : ros, name : '/qcbot_scenario_triggers', messageType : 'led_keepon/ScenarioTrigger' });
+
+            $(document).ready(function(){
+                setUpInputHandlers();
+            });
+            
+            function publish(scenario, parameter){
+                var msg = new ROSLIB.Message({
+                    scenario:scenario,
+                    param:parseInt(parameter)
+                });
+                topic.publish(msg);
+                console.log(msg);
+            }
+            
+            function setUpInputHandlers(){
+                $("#radTurnCorner").change(function(){
+                    $("#lblParameter").text("Turn Angle (-180,180)");
+                    formState.radState = "Turn Corner";
+                });
+                $("#radBackUp").change(function(){
+                    $("#lblParameter").text("Velocity (-100,100)");
+                    formState.radState = "Back Up";
+                });
+                $("#radObstacle").change(function(){
+                    $("#lblParameter").text("Direction (-180,180)");
+                    formState.radState = "Obstacle";
+                });
+                $("#radNone").change(function(){
+                    $("#lblParameter").text("None");
+                    formState.radState = "None";
+                });
+                $("#radBrake").change(function(){
+                    $("#lblParameter").text("Velocity (-100,100)");
+                    formState.radState = "Brake";
+                });
+                $("#btnCreateScenario").click(function(){
+                    if(!formState.buttonEnabled) return;
+                    publish(formState.radState, $("#txtParameter").val());
+                    $("#btnCreateScenario").text("Published!").removeClass("btn-success").addClass("btn-danger");
+                    formState.buttonEnabled = false;
+                    setTimeout(function(){
+                        $("#btnCreateScenario").text("Create Scenario").removeClass("btn-danger").addClass("btn-success");    
+                        formState.buttonEnabled = true;
+                    }, 100);
+                });
+            }
+            
+        </script>
+    </body>
+    
+    
+</html>
