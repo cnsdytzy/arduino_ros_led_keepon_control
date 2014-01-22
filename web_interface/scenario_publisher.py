@@ -21,7 +21,7 @@ def publish_topic(args):
     scenario = "Brake"
   elif(args.scenario_type == 4):
     scenario = "Obstacle"
-  cmd = "rostopic pub -1 /qcbot_scenario_triggers led_keepon/ScenarioTrigger " + '"' + scenario + '" ' + str(args.scenario_arg)
+  cmd = "rostopic pub -1 /qcbot_scenario_triggers led_keepon/ScenarioTrigger " + '"scenario: ' + "'" + scenario + "'\nparam: " + str(args.scenario_arg) + '"'
   print
   print cmd
   print "SCENARIO = %s" % scenario
