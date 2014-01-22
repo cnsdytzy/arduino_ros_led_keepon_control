@@ -22,7 +22,7 @@
     <body>
         
         <video id="vidPlayer" autoplay loop>
-            <source src="assets/Default_forward.mp4" type="video/mp4"/>
+            <source src="assets/Default_forward_checker_pattern.mp4" type="video/mp4"/>
         </video>
         <script type="text/javascript" type="text/javascript">
             
@@ -48,7 +48,7 @@
                 var video = document.getElementsByTagName('video')[0];
                 var sources = video.getElementsByTagName('source');
                 switch(message.scenario){
-                case "None": sources[0].src = "assets/Default_forward.mp4"; break;
+                case "None": sources[0].src = "assets/Default_forward_checker_pattern.mp4"; break;
                 case "Back Up": sources[0].src = "assets/Backing_Up.mp4"; break;
                 case "Turn Corner":
                   if(message.param > 0){
@@ -58,6 +58,30 @@
                   }
                 break;
                 case "Brake": sources[0].src = "assets/Braking.mp4"; break;
+                case "Obstacle":
+                  if(message.param < 0){
+                    message.param = message.param + 360;
+                  }
+                  var F_A = 45.0/2.0;
+                  var T_A = 45.0;
+                  if(message.param >= F_A && message.param < F_A + T_A){
+                    sources[0].src = "assets/obstacle_vids/Front_Right_Obstacle.mp4";
+                  }else if(message.param >= F_A + T_A && message.param < F_A + 2*T_A){
+                    sources[0].src = "assets/obstacle_vids/Right_Obstacle.mp4";
+                  }else if(message.param >= F_A + 2*T_A && message.param < F_A + 3*T_A){
+                    sources[0].src = "assets/obstacle_vids/Back_Right_Obstacle.mp4";
+                  }else if(message.param >= F_A + 3*T_A && message.param < F_A + 4*T_A){
+                    sources[0].src = "assets/obstacle_vids/Back_Obstacle.mp4";
+                  }else if(message.param >= F_A + 4*T_A && message.param < F_A + 5*T_A){
+                    sources[0].src = "assets/obstacle_vids/Back_Left_Obstacle.mp4";
+                  }else if(message.param >= F_A + 5*T_A && message.param < F_A + 6*T_A){
+                    sources[0].src = "assets/obstacle_vids/Left_Obstacle.mp4";
+                  }else if(message.param >= F_A + 6*T_A && message.param < F_A + 7*T_A){
+                    sources[0].src = "assets/obstacle_vids/Front_Left_Obstacle.mp4";
+                  }else if((message.param >= F_A + 7*T_A && message.param < F_A + 8*T_A) || (message.param >= 0 && message.param < F_A)){
+                    sources[0].src = "assets/obstacle_vids/Front_Obstacle.mp4";
+                  }
+                break;
                 }
                 console.log(sources[0].src);
                 video.load();
