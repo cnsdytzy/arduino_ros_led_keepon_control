@@ -10,22 +10,21 @@
             position:fixed;
             right:0;
             bottom:0;
-            /*min-width:100%;*/
+            min-width:100%;
             min-height:100%;
             width:auto;
             height:auto;
             z-index:-100;
-            /*background-size:cover;*/
+            background-size:cover;
           }
         </style>
     </head>
     <body>
         
         <video id="vidPlayer" autoplay loop>
-            <source src="assets/None.mp4" type="video/mp4"/>
+            <source src="assets/Default_forward.mp4" type="video/mp4"/>
         </video>
         <script type="text/javascript" type="text/javascript">
-            var videoForState = {"Back Up":"close_up_backup.mp4", "Obstacle":"forward_drive_person_appears_behind.mp4", "Turn Corner":"right_turn_into_room.mp4", "None":"None"};
             
             $(document).ready(function(){
                 var myVideo = document.getElementById('vidPlayer');
@@ -40,21 +39,31 @@
                  });
                 listener.subscribe(function(message) {
                     console.log(message);
-                    loadAnotherVideo(message.scenario, myVideo);
+                    loadAnotherVideo(message, myVideo);
                 });
             });
             
             
-            function loadAnotherVideo(robotState, myVideo) {
+            function loadAnotherVideo(message, myVideo) {
                 var video = document.getElementsByTagName('video')[0];
                 var sources = video.getElementsByTagName('source');
-                
-                sources[0].src = videoForState[robotState];
-                console.log(videoForState[robotState]);
+                switch(message.scenario){
+                case "None": sources[0].src = "assets/Default_forward.mp4"; break;
+                case "Back Up": sources[0].src = "assets/Backing_Up.mp4"; break;
+                case "Turn Corner":
+                  if(message.param > 0){
+                    sources[0].src = "assets/Right_Turn.mp4";
+                  }else{
+                    sources[0].src = "assets/Left_Turn.mp4";
+                  }
+                break;
+                case "Brake": sources[0].src = "assets/Braking.mp4"; break;
+                }
+                console.log(sources[0].src);
                 video.load();
                 play(myVideo);
-                console.log("Playing next video");
             }
+
             
             function play(myVideo){
                 if(myVideo.paused)
