@@ -58,7 +58,7 @@ def handle_trigger_keepon(scenario_trigger):
     keepon_mgr.move_pan(panTo)
     keepon_mgr.move_side_cycle()
   elif scenario_trigger.scenario == "Back Up":
-    keepon_mgr.move_pan(90)
+    keepon_mgr.move_pan(-90)
     keepon_mgr.move_side_right()
   elif scenario_trigger.scenario == "Brake":
     keepon_mgr.move_tilt(-100)

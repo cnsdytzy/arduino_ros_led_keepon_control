@@ -15,9 +15,9 @@
 
 /* Defines */
 
-#define LED_NUM_LEDS 32
-#define LED_DATA_PIN 2
-#define LED_CLOCK_PIN 3
+#define LED_NUM_LEDS 96
+#define LED_DATA_PIN 3
+#define LED_CLOCK_PIN 4
 #define LED_ZERO_OFFSET 0
 #define LED_SPOT_RADIUS 1
 
