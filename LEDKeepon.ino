@@ -7,6 +7,7 @@
 #include <ros.h>
 #include <led_keepon/KeeponMessage.h>
 #include <led_keepon/LEDMessage.h>
+#include <std_msgs/String.h>
 #include <Wire.h>
 #include "LPD8806.h"
 #include "SPI.h"
@@ -32,6 +33,8 @@
 #define LED_PIN 13
 #define MK_FREQ 49600L
 
+#define LOG(X) log_msg.data = X; log_pub.publish(&log_msg);
+
 LPD8806 strip = LPD8806(LED_NUM_LEDS, LED_DATA_PIN, LED_CLOCK_PIN);
 
 ros::NodeHandle nh;
@@ -50,6 +53,15 @@ int led_state_freq;
 
 TimedAction taLEDAction = TimedAction(100, led_act);
 
+std_msgs::String log_msg;
+ros::Publisher log_pub("arduino_logs", &log_msg);
+
+void keepon_message_cb(const led_keepon::KeeponMessage& msg);
+void led_message_cb(const led_keepon::LEDMessage& msg);
+ros::Subscriber<led_keepon::KeeponMessage> keepon_sub("qcbot_keepon_commands",&keepon_message_cb);
+ros::Subscriber<led_keepon::LEDMessage> led_sub("qcbot_led_commands",&led_message_cb);
+
+
 /* ROS Callback */
 
 void keepon_message_cb(const led_keepon::KeeponMessage& msg){
@@ -60,6 +72,7 @@ void keepon_message_cb(const led_keepon::KeeponMessage& msg){
 }
 
 void led_message_cb(const led_keepon::LEDMessage& msg){
+  LOG("Switching state to...");
   led_state_param1 = msg.led_param1;
   led_state_param2 = msg.led_param2;
   led_state_color1 = strip.Color(msg.color1[0], msg.color1[1], msg.color1[2]);
@@ -68,31 +81,46 @@ void led_message_cb(const led_keepon::LEDMessage& msg){
   led_state = msg.led_state;
   if(led_state == "Turn Corner"){
     led_state_as_int = LED_STATE_TURNCORNER;
+    LOG("...Turn Corner");
   }else if(led_state == "Back Up"){
     led_state_as_int = LED_STATE_BACKUP;
+    LOG("...Back Up");
   }else if(led_state == "Obstacle"){
     led_state_as_int = LED_STATE_OBSTACLE;
+    LOG("...Obstacle");
   }else if(led_state == "Brake"){
     led_state_as_int = LED_STATE_BRAKE;
+    LOG("...Brake");
   }else{
     led_state_as_int = LED_STATE_NONE;
+    LOG("...None");
   }
   led_state_changed();
 }
 
-ros::Subscriber<led_keepon::KeeponMessage> keepon_sub("qcbot_keepon_commands",&keepon_message_cb);
-ros::Subscriber<led_keepon::LEDMessage> led_sub("qcbot_led_commands",&led_message_cb);
 
 void setup(){
   pinMode(SDA, OUTPUT);
   pinMode(SCL, OUTPUT);
-
-  keepon_setup();
-  pinMode(LED_PIN, OUTPUT);
-  nh.initNode();
-  led_setup();
+  
   nh.subscribe(keepon_sub);
   nh.subscribe(led_sub);
+  nh.advertise(log_pub);
+  nh.initNode();
+  
+  LOG("Initialized Node");
+  
+  LOG("Setting up Keepon");
+  keepon_setup();
+  pinMode(LED_PIN, OUTPUT);
+  
+  LOG("Initializing node");
+  
+  
+  LOG("Setting up LED");
+  led_setup();
+  
+  
 }
 
 void loop(){

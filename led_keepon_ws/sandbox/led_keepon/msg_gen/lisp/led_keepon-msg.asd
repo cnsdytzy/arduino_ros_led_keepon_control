@@ -6,6 +6,8 @@
   :components ((:file "_package")
     (:file "LEDMessage" :depends-on ("_package_LEDMessage"))
     (:file "_package_LEDMessage" :depends-on ("_package"))
+    (:file "ArduinoLog" :depends-on ("_package_ArduinoLog"))
+    (:file "_package_ArduinoLog" :depends-on ("_package"))
     (:file "KeeponMessage" :depends-on ("_package_KeeponMessage"))
     (:file "_package_KeeponMessage" :depends-on ("_package"))
     (:file "ScenarioTrigger" :depends-on ("_package_ScenarioTrigger"))
