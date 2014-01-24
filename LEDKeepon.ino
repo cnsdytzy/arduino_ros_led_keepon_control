@@ -26,7 +26,6 @@
 #define LED_STATE_BACKUP 3
 #define LED_STATE_BRAKE 4
 #define LED_STATE_OBSTACLE 5
-#define LED_STATE_INITIAL 6
 
 #define LED_COLOR_NONE strip.Color(0,0,0)
 
@@ -61,6 +60,26 @@ void led_message_cb(const led_keepon::LEDMessage& msg);
 ros::Subscriber<led_keepon::KeeponMessage> keepon_sub("qcbot_keepon_commands",&keepon_message_cb);
 ros::Subscriber<led_keepon::LEDMessage> led_sub("qcbot_led_commands",&led_message_cb);
 
+/* LED Stuff */
+
+// Turn State
+boolean led_state_turnCorner_blinkerOn;
+int led_state_turnCorner_blinkerIndex;
+
+// None State
+boolean led_state_none_countingUp;
+int led_state_none_colorCounter;
+int led_state_none_r;
+int led_state_none_g;
+int led_state_none_b;
+
+// Obstacle State
+int led_state_obstacle_angle;
+int led_state_obstacle_index;
+
+// Backup State
+boolean led_state_backup_blinkerOn;
+
 
 /* ROS Callback */
 
@@ -79,21 +98,17 @@ void led_message_cb(const led_keepon::LEDMessage& msg){
   led_state_color2 = strip.Color(msg.color2[0], msg.color2[1], msg.color2[2]);
   led_state_freq = msg.freq;
   led_state = msg.led_state;
+  LOG(msg.led_state);
   if(led_state == "Turn Corner"){
     led_state_as_int = LED_STATE_TURNCORNER;
-    LOG("...Turn Corner");
   }else if(led_state == "Back Up"){
     led_state_as_int = LED_STATE_BACKUP;
-    LOG("...Back Up");
   }else if(led_state == "Obstacle"){
     led_state_as_int = LED_STATE_OBSTACLE;
-    LOG("...Obstacle");
   }else if(led_state == "Brake"){
     led_state_as_int = LED_STATE_BRAKE;
-    LOG("...Brake");
   }else{
     led_state_as_int = LED_STATE_NONE;
-    LOG("...None");
   }
   led_state_changed();
 }
@@ -107,20 +122,9 @@ void setup(){
   nh.subscribe(led_sub);
   nh.advertise(log_pub);
   nh.initNode();
-  
-  LOG("Initialized Node");
-  
-  LOG("Setting up Keepon");
   keepon_setup();
   pinMode(LED_PIN, OUTPUT);
-  
-  LOG("Initializing node");
-  
-  
-  LOG("Setting up LED");
   led_setup();
-  
-  
 }
 
 void loop(){
@@ -152,30 +156,12 @@ void keepon_transmit(){
   }
 }
 
-/* LED Stuff */
-
-// Turn State
-boolean led_state_turnCorner_blinkerOn;
-int led_state_turnCorner_blinkerIndex;
-
-// None State
-boolean led_state_none_countingUp;
-int led_state_none_colorCounter;
-int led_state_none_r;
-int led_state_none_g;
-int led_state_none_b;
-
-// Obstacle State
-int led_state_obstacle_angle;
-int led_state_obstacle_index;
-
-// Backup State
-boolean led_state_backup_blinkerOn;
 
 void led_setup(){
   strip.begin();
   strip.show();
-  led_state_as_int = LED_STATE_INITIAL;
+  led_state_as_int = LED_STATE_NONE;
+  led_state_color1 = strip.Color(0,127,0);
   led_state_changed();
 }
 
