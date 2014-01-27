@@ -15,11 +15,10 @@
 
 /* Defines */
 
-#define LED_NUM_LEDS 32 // TODO - turn this to appropriate number
 #define LED_DATA_PIN 2
 #define LED_CLOCK_PIN 3
 
-#define LED_ZERO_OFFSET 0
+
 #define LED_SPOT_RADIUS 0
 
 #define LED_STATE_NONE 1
@@ -35,26 +34,24 @@
 
 #define LOG(X) log_msg.data = X; log_pub.publish(&log_msg);
 
-const int F = LED_ZERO_OFFSET;
-const int S = 10;//36;
-const int R = 10;//34;
-const int P = 2*(R+S);
-const int L = LED_NUM_LEDS;
-const int FR_Blinker = (F + (R*L)/(4*P))%L;
-const int FL_Blinker = (F + L - (R*L)/(4*P))%L;
-const int BR_Blinker = (F + (3*R*L)/(4*P) + (S*L)/P)%L;
-const int BL_Blinker = (F + (5*R*L)/(4*P) + (S*L)/P)%L;
-
+const float LED_SCALE = 8.0f/3.0f;
 const float F_A = 45.0f/2.0f;
 const float T_A = 45.0f;
-const int OB_N = F % L;
-const int OB_NE = (F + (R*L)/(2*P))%L;
-const int OB_E = (F + (R*L)/(2*P) + (S*L)/(2*P))%L;
-const int OB_SE = (F + (R*L)/(2*P) + (S*L)/(P))%L;
-const int OB_S = (F + (S + R)*L/P)%L;
-const int OB_SW = (F + (3*R*L)/(2*P) + (S*L)/P)%L;
-const int OB_W = (F + (3*R*L)/(2*P) + (3*S*L)/(2*P))%L;
-const int OB_NW = (F + (3*R*L)/(2*P) + (2*S*L)/(P))%F;
+const int LED_NUM_LEDS = (int)(LED_SCALE * 12);
+const int LED_ZERO_OFFSET = (int)(LED_SCALE * 10);
+const int LED_N = ((int)(LED_SCALE*0))%LED_NUM_LEDS;
+const int LED_FR = ((int)(LED_SCALE*1))%LED_NUM_LEDS;
+const int LED_NE = ((int)(LED_SCALE*2-LED_SPOT_RADIUS-1))%LED_NUM_LEDS;
+const int LED_E = ((int)(LED_SCALE*3))%LED_NUM_LEDS;
+const int LED_SE = ((int)(LED_SCALE*4))%LED_NUM_LEDS;
+const int LED_BR = ((int)(LED_SCALE*5))%LED_NUM_LEDS;
+const int LED_S = ((int)(LED_SCALE*6))%LED_NUM_LEDS;
+const int LED_BL = ((int)(LED_SCALE*7))%LED_NUM_LEDS;
+const int LED_SW = ((int)(LED_SCALE*8))%LED_NUM_LEDS;
+const int LED_W = ((int)(LED_SCALE*9))%LED_NUM_LEDS;
+const int LED_NW = ((int)(LED_SCALE*10))%LED_NUM_LEDS;
+const int LED_FL = ((int)(LED_SCALE*11))%LED_NUM_LEDS;
+
 
 LPD8806 strip = LPD8806(LED_NUM_LEDS, LED_DATA_PIN, LED_CLOCK_PIN);
 
@@ -235,8 +232,8 @@ void led_act_backup(){
   int rightTailBlinkerIndex = (strip.numPixels()*5/8 + LED_ZERO_OFFSET)%strip.numPixels();
   
   led_color_strip((led_state_backup_blinkerOn) ? led_state_color2 : LED_COLOR_NONE);
-  led_draw_spot(BL_Blinker,led_state_color1);
-  led_draw_spot(BR_Blinker,led_state_color1);
+  led_draw_spot(LED_BL,led_state_color1);
+  led_draw_spot(LED_BR,led_state_color1);
   led_state_backup_blinkerOn = !led_state_backup_blinkerOn;
   strip.show();
 }
@@ -246,9 +243,11 @@ void led_state_changed(){
   if(led_state_as_int == LED_STATE_TURNCORNER){
     led_state_turnCorner_blinkerOn = false;
     if(constrain(led_state_param1, -180, 180) >= 0){
-      led_state_turnCorner_blinkerIndex = FR_Blinker;//(strip.numPixels()/8+LED_ZERO_OFFSET)%strip.numPixels();
+      LOG("Right Turn");
+      led_state_turnCorner_blinkerIndex = LED_FR;//(strip.numPixels()/8+LED_ZERO_OFFSET)%strip.numPixels();
     }else{
-      led_state_turnCorner_blinkerIndex = FL_Blinker;//(strip.numPixels()*7/8+LED_ZERO_OFFSET)%strip.numPixels();
+      LOG("Left Turn");
+      led_state_turnCorner_blinkerIndex = LED_FL;//(strip.numPixels()*7/8+LED_ZERO_OFFSET)%strip.numPixels();
     }
     taLEDAction.setInterval(500);
   }else if(led_state_as_int == LED_STATE_OBSTACLE){
@@ -261,12 +260,14 @@ void led_state_changed(){
     led_state_obstacle_index = 0;
     taLEDAction.setInterval(1000/strip.numPixels());
   }else if(led_state_as_int == LED_STATE_BRAKE){
+    LOG("Brake");
     int leftTailBlinkerIndex = (strip.numPixels()*3/8 + LED_ZERO_OFFSET)%strip.numPixels();
     int rightTailBlinkerIndex = (strip.numPixels()*5/8 + LED_ZERO_OFFSET)%strip.numPixels();
-    led_draw_spot(BR_Blinker, led_state_color1);
-    led_draw_spot(BL_Blinker, led_state_color1);
+    led_draw_spot(LED_BR, led_state_color1);
+    led_draw_spot(LED_BL, led_state_color1);
     strip.show();
   }else if(led_state_as_int == LED_STATE_BACKUP){
+    LOG("Back Up");
     led_state_backup_blinkerOn = false;
     taLEDAction.setInterval(500);
   }else if(led_state_as_int == LED_STATE_NONE){
@@ -281,21 +282,29 @@ void led_state_changed(){
 
 int led_obstacle_direction_for_angle(int angle){
   if(angle >= F_A && angle < F_A + T_A){
-    return OB_NE;
+    LOG("Obstacle NE");
+    return LED_NE;
   }else if(angle >= F_A + T_A && angle < F_A + 2*T_A){
-    return OB_E;
+    LOG("Obstacle E");
+    return LED_E;
   }else if(angle >= F_A + 2*T_A && angle < F_A + 3*T_A){
-    return OB_SE;
+    LOG("Obstacle SE");
+    return LED_SE;
   }else if(angle >= F_A + 3*T_A && angle < F_A + 4*T_A){
-    return OB_S;
+    LOG("Obstacle S");
+    return LED_S;
   }else if(angle >= F_A + 4*T_A && angle < F_A + 5*T_A){
-    return OB_SW;
+    LOG("Obstacle SW");
+    return LED_SW;
   }else if(angle >= F_A + 5*T_A && angle < F_A + 6*T_A){
-    return OB_W;
+    LOG("Obstacle W");
+    return LED_W;
   }else if(angle >= F_A + 6*T_A && angle < F_A + 7*T_A){
-    return OB_NW;
+    LOG("Obstacle NW");
+    return LED_NW;
   }else if((angle >= F_A + 7*T_A && angle < F_A + 8*T_A) || (angle >= 0 && angle < F_A)){
-    return OB_N;
+    LOG("Obstacle N");
+    return LED_N;
   }
 }
 
