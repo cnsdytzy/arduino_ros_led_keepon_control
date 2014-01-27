@@ -34,10 +34,14 @@
 
 #define LOG(X) log_msg.data = X; log_pub.publish(&log_msg);
 
-const float LED_SCALE = 8.0f/3.0f;
+
+const int LED_NUM_LEDS = 12;
+const boolean ENABLE_KEEPON = false;
+const boolean ENABLE_LEDS = true;
+
+const float LED_SCALE = ((float)LED_NUM_LEDS)/12.0f;
 const float F_A = 45.0f/2.0f;
 const float T_A = 45.0f;
-const int LED_NUM_LEDS = (int)(LED_SCALE * 12);
 const int LED_ZERO_OFFSET = (int)(LED_SCALE * 10);
 const int LED_N = ((int)(LED_SCALE*0))%LED_NUM_LEDS;
 const int LED_FR = ((int)(LED_SCALE*1))%LED_NUM_LEDS;
@@ -120,20 +124,33 @@ void led_message_cb(const led_keepon::LEDMessage& msg){
 
 
 void setup(){
-  pinMode(SDA, OUTPUT);
-  pinMode(SCL, OUTPUT);
+  if(ENABLE_KEEPON){
+    pinMode(SDA, OUTPUT);
+    pinMode(SCL, OUTPUT);
+    nh.subscribe(keepon_sub);
+  }
   
-  //nh.subscribe(keepon_sub);
-  nh.subscribe(led_sub);
+  if(ENABLE_LEDS){
+    nh.subscribe(led_sub);
+  }
+  
   nh.advertise(log_pub);
   nh.initNode();
-  //keepon_setup();
+  
+  if(ENABLE_KEEPON){
+    keepon_setup();
+  }
   pinMode(LED_PIN, OUTPUT);
-  led_setup();
+  
+  if(ENABLE_LEDS){
+    led_setup();
+  }
 }
 
 void loop(){
-  taLEDAction.check();
+  if(ENABLE_LEDS){
+    taLEDAction.check();
+  }
   nh.spinOnce();
   delay(1);
 }
