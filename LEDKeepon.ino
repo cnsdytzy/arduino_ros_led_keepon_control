@@ -15,7 +15,7 @@
 
 /* Defines */
 
-#define LED_NUM_LEDS 64
+#define LED_NUM_LEDS 32 // TODO - turn this to appropriate number
 #define LED_DATA_PIN 3
 #define LED_CLOCK_PIN 4
 #define LED_ZERO_OFFSET 0
@@ -91,28 +91,29 @@ void keepon_message_cb(const led_keepon::KeeponMessage& msg){
 }
 
 void led_message_cb(const led_keepon::LEDMessage& msg){
-  LOG("Switching state to...");
+  LOG("Received state...");
   led_state_param1 = msg.led_param1;
   led_state_param2 = msg.led_param2;
   led_state_color1 = strip.Color(msg.color1[0], msg.color1[1], msg.color1[2]);
   led_state_color2 = strip.Color(msg.color2[0], msg.color2[1], msg.color2[2]);
   led_state_freq = msg.freq;
   led_state = msg.led_state;
+  LOG(msg.led_state);
   if(led_state == "Turn Corner"){
     led_state_as_int = LED_STATE_TURNCORNER;
-    LOG("Turn Corner");
+    LOG("Switching to Turn Corner");
   }else if(led_state == "Back Up"){
     led_state_as_int = LED_STATE_BACKUP;
-    LOG("Back Up");
+    LOG("Switching to Back Up");
   }else if(led_state == "Obstacle"){
     led_state_as_int = LED_STATE_OBSTACLE;
-    LOG("Obstacle");
+    LOG("Switching to Obstacle");
   }else if(led_state == "Brake"){
     led_state_as_int = LED_STATE_BRAKE;
-    LOG("Brake");
+    LOG("Switching to Brake");
   }else{
     led_state_as_int = LED_STATE_NONE;
-    LOG("None");
+    LOG("Switching to None");
   }
   led_state_changed();
 }
@@ -170,6 +171,7 @@ void led_setup(){
 }
 
 void led_act(){
+  return;  // TODO - remove this line
   switch(led_state_as_int){
     case LED_STATE_TURNCORNER: led_act_turncorner(); break;
     case LED_STATE_OBSTACLE: led_act_obstacle(); break;

@@ -6,10 +6,10 @@ import struct
 
 
 class LEDMessage(genpy.Message):
-  _md5sum = "0b4e62f07a3469f99fb7a12a5da4108c"
+  _md5sum = "55920192e5581cc9eac7865606e971e9"
   _type = "led_keepon/LEDMessage"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """string led_state
+  _full_text = """int32 led_state
 int32 freq
 int32 led_param1
 int32[3] color1
@@ -18,7 +18,7 @@ int32[3] color2
 
 """
   __slots__ = ['led_state','freq','led_param1','color1','led_param2','color2']
-  _slot_types = ['string','int32','int32','int32[3]','int32','int32[3]']
+  _slot_types = ['int32','int32','int32','int32[3]','int32','int32[3]']
 
   def __init__(self, *args, **kwds):
     """
@@ -38,7 +38,7 @@ int32[3] color2
       super(LEDMessage, self).__init__(*args, **kwds)
       #message fields cannot be None, assign default values for those that are
       if self.led_state is None:
-        self.led_state = ''
+        self.led_state = 0
       if self.freq is None:
         self.freq = 0
       if self.led_param1 is None:
@@ -50,7 +50,7 @@ int32[3] color2
       if self.color2 is None:
         self.color2 = [0,0,0]
     else:
-      self.led_state = ''
+      self.led_state = 0
       self.freq = 0
       self.led_param1 = 0
       self.color1 = [0,0,0]
@@ -69,14 +69,8 @@ int32[3] color2
     :param buff: buffer, ``StringIO``
     """
     try:
-      _x = self.led_state
-      length = len(_x)
-      if python3 or type(_x) == unicode:
-        _x = _x.encode('utf-8')
-        length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2i.pack(_x.freq, _x.led_param1))
+      buff.write(_struct_3i.pack(_x.led_state, _x.freq, _x.led_param1))
       buff.write(_struct_3i.pack(*self.color1))
       buff.write(_struct_i.pack(self.led_param2))
       buff.write(_struct_3i.pack(*self.color2))
@@ -90,19 +84,10 @@ int32[3] color2
     """
     try:
       end = 0
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      start = end
-      end += length
-      if python3:
-        self.led_state = str[start:end].decode('utf-8')
-      else:
-        self.led_state = str[start:end]
       _x = self
       start = end
-      end += 8
-      (_x.freq, _x.led_param1,) = _struct_2i.unpack(str[start:end])
+      end += 12
+      (_x.led_state, _x.freq, _x.led_param1,) = _struct_3i.unpack(str[start:end])
       start = end
       end += 12
       self.color1 = _struct_3i.unpack(str[start:end])
@@ -124,14 +109,8 @@ int32[3] color2
     :param numpy: numpy python module
     """
     try:
-      _x = self.led_state
-      length = len(_x)
-      if python3 or type(_x) == unicode:
-        _x = _x.encode('utf-8')
-        length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2i.pack(_x.freq, _x.led_param1))
+      buff.write(_struct_3i.pack(_x.led_state, _x.freq, _x.led_param1))
       buff.write(self.color1.tostring())
       buff.write(_struct_i.pack(self.led_param2))
       buff.write(self.color2.tostring())
@@ -146,19 +125,10 @@ int32[3] color2
     """
     try:
       end = 0
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      start = end
-      end += length
-      if python3:
-        self.led_state = str[start:end].decode('utf-8')
-      else:
-        self.led_state = str[start:end]
       _x = self
       start = end
-      end += 8
-      (_x.freq, _x.led_param1,) = _struct_2i.unpack(str[start:end])
+      end += 12
+      (_x.led_state, _x.freq, _x.led_param1,) = _struct_3i.unpack(str[start:end])
       start = end
       end += 12
       self.color1 = numpy.frombuffer(str[start:end], dtype=numpy.int32, count=3)
@@ -175,4 +145,3 @@ int32[3] color2
 _struct_I = genpy.struct_I
 _struct_i = struct.Struct("<i")
 _struct_3i = struct.Struct("<3i")
-_struct_2i = struct.Struct("<2i")

@@ -12,7 +12,7 @@ namespace led_keepon
   class LEDMessage : public ros::Msg
   {
     public:
-      char * led_state;
+      long led_state;
       long freq;
       long led_param1;
       long color1[3];
@@ -22,11 +22,16 @@ namespace led_keepon
     virtual int serialize(unsigned char *outbuffer)
     {
       int offset = 0;
-      long * length_led_state = (long *)(outbuffer + offset);
-      *length_led_state = strlen( (const char*) this->led_state);
-      offset += 4;
-      memcpy(outbuffer + offset, this->led_state, *length_led_state);
-      offset += *length_led_state;
+      union {
+        long real;
+        unsigned long base;
+      } u_led_state;
+      u_led_state.real = this->led_state;
+      *(outbuffer + offset + 0) = (u_led_state.base >> (8 * 0)) & 0xFF;
+      *(outbuffer + offset + 1) = (u_led_state.base >> (8 * 1)) & 0xFF;
+      *(outbuffer + offset + 2) = (u_led_state.base >> (8 * 2)) & 0xFF;
+      *(outbuffer + offset + 3) = (u_led_state.base >> (8 * 3)) & 0xFF;
+      offset += sizeof(this->led_state);
       union {
         long real;
         unsigned long base;
@@ -89,14 +94,17 @@ namespace led_keepon
     virtual int deserialize(unsigned char *inbuffer)
     {
       int offset = 0;
-      uint32_t length_led_state = *(uint32_t *)(inbuffer + offset);
-      offset += 4;
-      for(unsigned int k= offset; k< offset+length_led_state; ++k){
-          inbuffer[k-1]=inbuffer[k];
-           }
-      inbuffer[offset+length_led_state-1]=0;
-      this->led_state = (char *)(inbuffer + offset-1);
-      offset += length_led_state;
+      union {
+        long real;
+        unsigned long base;
+      } u_led_state;
+      u_led_state.base = 0;
+      u_led_state.base |= ((typeof(u_led_state.base)) (*(inbuffer + offset + 0))) << (8 * 0);
+      u_led_state.base |= ((typeof(u_led_state.base)) (*(inbuffer + offset + 1))) << (8 * 1);
+      u_led_state.base |= ((typeof(u_led_state.base)) (*(inbuffer + offset + 2))) << (8 * 2);
+      u_led_state.base |= ((typeof(u_led_state.base)) (*(inbuffer + offset + 3))) << (8 * 3);
+      this->led_state = u_led_state.real;
+      offset += sizeof(this->led_state);
       union {
         long real;
         unsigned long base;
