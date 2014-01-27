@@ -15,11 +15,12 @@
 
 /* Defines */
 
-#define LED_NUM_LEDS 72 // TODO - turn this to appropriate number
+#define LED_NUM_LEDS 96 // TODO - turn this to appropriate number
 #define LED_DATA_PIN 3
 #define LED_CLOCK_PIN 4
+
 #define LED_ZERO_OFFSET 0
-#define LED_SPOT_RADIUS 1
+#define LED_SPOT_RADIUS 2
 
 #define LED_STATE_NONE 1
 #define LED_STATE_TURNCORNER 2
@@ -27,13 +28,22 @@
 #define LED_STATE_BACKUP 4
 #define LED_STATE_BRAKE 5
 
-
 #define LED_COLOR_NONE strip.Color(0,0,0)
 
 #define LED_PIN 13
 #define MK_FREQ 49600L
 
 #define LOG(X) log_msg.data = X; log_pub.publish(&log_msg);
+
+const int F = LED_ZERO_OFFSET;
+const int S = 36;//10;
+const int R = 34;//10;
+const int P = 2*(R+S);
+const int L = LED_NUM_LEDS;
+const int FR_Blinker = (F + (R*L)/(4*P))%L;
+const int FL_Blinker = (F + L - (R*L)/(4*P))%L;
+const int BR_Blinker = (F + (3*R*L)/(4*P) + (S*L)/P)%L;
+const int BL_Blinker = (F + (5*R*L)/(4*P) + (S*L)/P)%L;
 
 LPD8806 strip = LPD8806(LED_NUM_LEDS, LED_DATA_PIN, LED_CLOCK_PIN);
 
@@ -215,8 +225,8 @@ void led_act_backup(){
   int rightTailBlinkerIndex = (strip.numPixels()*5/8 + LED_ZERO_OFFSET)%strip.numPixels();
   
   led_color_strip((led_state_backup_blinkerOn) ? led_state_color2 : LED_COLOR_NONE);
-  led_draw_spot(leftTailBlinkerIndex,led_state_color1);
-  led_draw_spot(rightTailBlinkerIndex,led_state_color1);
+  led_draw_spot(BL_Blinker,led_state_color1);
+  led_draw_spot(BR_Blinker,led_state_color1);
   led_state_backup_blinkerOn = !led_state_backup_blinkerOn;
   strip.show();
 }
@@ -226,9 +236,9 @@ void led_state_changed(){
   if(led_state_as_int == LED_STATE_TURNCORNER){
     led_state_turnCorner_blinkerOn = false;
     if(constrain(led_state_param1, -180, 180) >= 0){
-      led_state_turnCorner_blinkerIndex = (strip.numPixels()/8+LED_ZERO_OFFSET)%strip.numPixels();
+      led_state_turnCorner_blinkerIndex = FR_Blinker;//(strip.numPixels()/8+LED_ZERO_OFFSET)%strip.numPixels();
     }else{
-      led_state_turnCorner_blinkerIndex = (strip.numPixels()*7/8+LED_ZERO_OFFSET)%strip.numPixels();
+      led_state_turnCorner_blinkerIndex = FL_Blinker;//(strip.numPixels()*7/8+LED_ZERO_OFFSET)%strip.numPixels();
     }
     taLEDAction.setInterval(500);
   }else if(led_state_as_int == LED_STATE_OBSTACLE){
@@ -238,8 +248,8 @@ void led_state_changed(){
   }else if(led_state_as_int == LED_STATE_BRAKE){
     int leftTailBlinkerIndex = (strip.numPixels()*3/8 + LED_ZERO_OFFSET)%strip.numPixels();
     int rightTailBlinkerIndex = (strip.numPixels()*5/8 + LED_ZERO_OFFSET)%strip.numPixels();
-    led_draw_spot(leftTailBlinkerIndex, led_state_color1);
-    led_draw_spot(rightTailBlinkerIndex, led_state_color1);
+    led_draw_spot(BR_Blinker, led_state_color1);
+    led_draw_spot(BL_Blinker, led_state_color1);
     strip.show();
   }else if(led_state_as_int == LED_STATE_BACKUP){
     led_state_backup_blinkerOn = false;
