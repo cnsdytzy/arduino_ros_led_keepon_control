@@ -33,15 +33,15 @@ def handle_trigger_led(scenario_trigger):
   NONE = (0,0,0)
   WHITE = (127,127,127)
   if scenario_trigger.scenario == "None":
-    led_mgr.publishMessage(led_state="None", color1=GREEN)
+    led_mgr.publishMessage(led_state=1, color1=GREEN)
   elif scenario_trigger.scenario == "Turn Corner":
-    led_mgr.publishMessage(led_state="Turn Corner", led_param1=val_constrain(scenario_trigger.param, -180, 180), color1=ORANGE)
+    led_mgr.publishMessage(led_state=2, led_param1=val_constrain(scenario_trigger.param, -180, 180), color1=ORANGE)
   elif scenario_trigger.scenario == "Obstacle":
-    led_mgr.publishMessage(led_state="Obstacle", led_param1= val_constrain(scenario_trigger.param, -180, 180), color1=ORANGE, color2=DIM_YELLOW)
+    led_mgr.publishMessage(led_state=3, led_param1= val_constrain(scenario_trigger.param, -180, 180), color1=ORANGE, color2=DIM_YELLOW)
   elif scenario_trigger.scenario == "Back Up":
-    led_mgr.publishMessage(led_state="Back Up", color1=WHITE, color2=DIM_YELLOW)
+    led_mgr.publishMessage(led_state=4, color1=WHITE, color2=DIM_YELLOW)
   elif scenario_trigger.scenario == "Brake":
-    led_mgr.publishMessage(led_state="Brake", color1=ORANGE)
+    led_mgr.publishMessage(led_state=5, color1=ORANGE)
   print "Published LED Message"
 
 def handle_trigger_keepon(scenario_trigger):
