@@ -18,7 +18,7 @@ def val_constrain(val, low, high):
 
 def val_map(val, fromLow, fromHigh, toLow, toHigh, asFloat=False):
   val = val_constrain(val, fromLow, fromHigh)
-  return (int)((val - fromLow)/(fromHigh - fromLow)*(toHigh - toLow) + toLow)
+  return (int)((val - fromLow)/1.0/(fromHigh - fromLow)*(toHigh - toLow) + toLow)
 
 def handle_trigger(scenario_trigger):
   rospy.loginfo(rospy.get_name() + ": I heard %s" % scenario_trigger.scenario)

@@ -15,7 +15,7 @@
 
 /* Defines */
 
-#define LED_NUM_LEDS 32 // TODO - turn this to appropriate number
+#define LED_NUM_LEDS 72 // TODO - turn this to appropriate number
 #define LED_DATA_PIN 3
 #define LED_CLOCK_PIN 4
 #define LED_ZERO_OFFSET 0
