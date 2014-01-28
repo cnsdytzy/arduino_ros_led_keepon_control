@@ -56,7 +56,11 @@ const int LED_W = ((int)(LED_SCALE*9))%LED_NUM_LEDS;
 const int LED_NW = ((int)(LED_SCALE*10))%LED_NUM_LEDS;
 const int LED_FL = ((int)(LED_SCALE*11))%LED_NUM_LEDS;
 
-
+void keepon_message_cb(const led_keepon::KeeponMessage& msg);
+void led_message_cb(const led_keepon::LEDMessage& msg);
+void led_act();
+void keepon_transmit();
+void led_state_changed();
 LPD8806 strip = LPD8806(LED_NUM_LEDS, LED_DATA_PIN, LED_CLOCK_PIN);
 
 ros::NodeHandle nh;
@@ -77,8 +81,9 @@ TimedAction taLEDAction = TimedAction(100, led_act);
 std_msgs::String log_msg;
 ros::Publisher log_pub("arduino_logs", &log_msg);
 
-void keepon_message_cb(const led_keepon::KeeponMessage& msg);
-void led_message_cb(const led_keepon::LEDMessage& msg);
+
+
+
 ros::Subscriber<led_keepon::KeeponMessage> keepon_sub("qcbot_keepon_commands",&keepon_message_cb);
 ros::Subscriber<led_keepon::LEDMessage> led_sub("qcbot_led_commands",&led_message_cb);
 
