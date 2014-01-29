@@ -19,7 +19,7 @@
 #define LED_CLOCK_PIN 3
 
 
-#define LED_SPOT_RADIUS 0
+#define LED_SPOT_RADIUS 1
 
 #define LED_STATE_NONE 1
 #define LED_STATE_TURNCORNER 2
@@ -35,27 +35,26 @@
 #define LOG(X) log_msg.data = X; log_pub.publish(&log_msg);
 
 
-const int LED_NUM_LEDS = 12;
-const boolean ENABLE_KEEPON = false;
+const int LED_NUM_LEDS = 64;
+const boolean ENABLE_KEEPON = true;
 const boolean ENABLE_LEDS = true;
 
-const float LED_SCALE = ((float)LED_NUM_LEDS)/12.0f;
 const float F_A = 45.0f/2.0f;
 const float T_A = 45.0f;
-const int LED_ZERO_OFFSET = (int)(LED_SCALE * 10);
-const int LED_N = ((int)(LED_SCALE*0))%LED_NUM_LEDS;
-const int LED_FR = ((int)(LED_SCALE*1))%LED_NUM_LEDS;
-const int LED_NE = ((int)(LED_SCALE*2-LED_SPOT_RADIUS-1))%LED_NUM_LEDS;
-const int LED_E = ((int)(LED_SCALE*3))%LED_NUM_LEDS;
-const int LED_SE = ((int)(LED_SCALE*4))%LED_NUM_LEDS;
-const int LED_BR = ((int)(LED_SCALE*5))%LED_NUM_LEDS;
-const int LED_S = ((int)(LED_SCALE*6))%LED_NUM_LEDS;
-const int LED_BL = ((int)(LED_SCALE*7))%LED_NUM_LEDS;
-const int LED_SW = ((int)(LED_SCALE*8))%LED_NUM_LEDS;
-const int LED_W = ((int)(LED_SCALE*9))%LED_NUM_LEDS;
-const int LED_NW = ((int)(LED_SCALE*10))%LED_NUM_LEDS;
-const int LED_FL = ((int)(LED_SCALE*11))%LED_NUM_LEDS;
-
+const float LED_SCALE = ((float)LED_NUM_LEDS)/12.0f;
+const int LED_ZERO_OFFSET = 0;//(int)(LED_SCALE * 2);
+const int LED_N = 12;//((int)(LED_SCALE*0))%LED_NUM_LEDS;
+const int LED_FR = 7;//((int)(LED_SCALE*1))%LED_NUM_LEDS;
+const int LED_NE = 0;//((int)(LED_SCALE*2-LED_SPOT_RADIUS-1))%LED_NUM_LEDS;
+const int LED_E = 0;//((int)(LED_SCALE*3))%LED_NUM_LEDS;
+const int LED_SE = 95;//((int)(LED_SCALE*4))%LED_NUM_LEDS;
+const int LED_BR = 50;//((int)(LED_SCALE*5))%LED_NUM_LEDS;
+const int LED_S = 80;//((int)(LED_SCALE*6))%LED_NUM_LEDS;
+const int LED_BL = 45;//((int)(LED_SCALE*7))%LED_NUM_LEDS;
+const int LED_SW = 36;//((int)(LED_SCALE*8))%LED_NUM_LEDS;
+const int LED_W = 40;//((int)(LED_SCALE*9))%LED_NUM_LEDS;
+const int LED_NW = 23;//((int)(LED_SCALE*10))%LED_NUM_LEDS;
+const int LED_FL = 17;//((int)(LED_SCALE*11))%LED_NUM_LEDS;
 void keepon_message_cb(const led_keepon::KeeponMessage& msg);
 void led_message_cb(const led_keepon::LEDMessage& msg);
 void led_act();

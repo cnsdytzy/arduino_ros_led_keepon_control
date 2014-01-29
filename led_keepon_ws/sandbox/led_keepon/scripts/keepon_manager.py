@@ -59,7 +59,7 @@ class KeeponManager:
     self.publishMessage(6,240, 0b11111111 & 0x55)
   def stop_movement(self):
     self.move_side_centerfromright()
-    self.move_tilt(0)
+    self.move_tilt(30)
   def turn_to_center(self):
     self.move_pan(0)
 
