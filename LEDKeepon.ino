@@ -15,8 +15,8 @@
 
 /* Defines */
 
-#define LED_DATA_PIN 2
-#define LED_CLOCK_PIN 3
+#define LED_DATA_PIN 11
+#define LED_CLOCK_PIN 13
 
 
 #define LED_SPOT_RADIUS 1
@@ -35,32 +35,32 @@
 #define LOG(X) log_msg.data = X; log_pub.publish(&log_msg);
 
 
-const int LED_NUM_LEDS = 64;
-const boolean ENABLE_KEEPON = true;
+const int LED_NUM_LEDS = 65;
+const boolean ENABLE_KEEPON = false;
 const boolean ENABLE_LEDS = true;
 
 const float F_A = 45.0f/2.0f;
 const float T_A = 45.0f;
-const float LED_SCALE = ((float)LED_NUM_LEDS)/12.0f;
+//const float LED_SCALE = ((float)LED_NUM_LEDS)/12.0f;
 const int LED_ZERO_OFFSET = 0;//(int)(LED_SCALE * 2);
 const int LED_N = 12;//((int)(LED_SCALE*0))%LED_NUM_LEDS;
 const int LED_FR = 7;//((int)(LED_SCALE*1))%LED_NUM_LEDS;
-const int LED_NE = 0;//((int)(LED_SCALE*2-LED_SPOT_RADIUS-1))%LED_NUM_LEDS;
-const int LED_E = 0;//((int)(LED_SCALE*3))%LED_NUM_LEDS;
-const int LED_SE = 95;//((int)(LED_SCALE*4))%LED_NUM_LEDS;
-const int LED_BR = 50;//((int)(LED_SCALE*5))%LED_NUM_LEDS;
-const int LED_S = 80;//((int)(LED_SCALE*6))%LED_NUM_LEDS;
-const int LED_BL = 45;//((int)(LED_SCALE*7))%LED_NUM_LEDS;
-const int LED_SW = 36;//((int)(LED_SCALE*8))%LED_NUM_LEDS;
-const int LED_W = 40;//((int)(LED_SCALE*9))%LED_NUM_LEDS;
+const int LED_NE = 3;//((int)(LED_SCALE*2-LED_SPOT_RADIUS-1))%LED_NUM_LEDS;
+const int LED_E = 68;//((int)(LED_SCALE*3))%LED_NUM_LEDS;
+const int LED_SE = 58;//((int)(LED_SCALE*4))%LED_NUM_LEDS;
+const int LED_BR = 54;//((int)(LED_SCALE*5))%LED_NUM_LEDS;
+const int LED_S = 51;//((int)(LED_SCALE*6))%LED_NUM_LEDS;
+const int LED_BL = 47;//((int)(LED_SCALE*7))%LED_NUM_LEDS;
+const int LED_SW = 42;//((int)(LED_SCALE*8))%LED_NUM_LEDS;
+const int LED_W = 32;//((int)(LED_SCALE*9))%LED_NUM_LEDS;
 const int LED_NW = 23;//((int)(LED_SCALE*10))%LED_NUM_LEDS;
-const int LED_FL = 17;//((int)(LED_SCALE*11))%LED_NUM_LEDS;
+const int LED_FL = 18;//((int)(LED_SCALE*11))%LED_NUM_LEDS;
 void keepon_message_cb(const led_keepon::KeeponMessage& msg);
 void led_message_cb(const led_keepon::LEDMessage& msg);
 void led_act();
 void keepon_transmit();
 void led_state_changed();
-LPD8806 strip = LPD8806(LED_NUM_LEDS, LED_DATA_PIN, LED_CLOCK_PIN);
+LPD8806 strip = LPD8806(LED_NUM_LEDS);
 
 ros::NodeHandle nh;
 
@@ -140,21 +140,19 @@ void setup(){
   
   nh.advertise(log_pub);
   nh.initNode();
-  
-  if(ENABLE_KEEPON){
-    keepon_setup();
-  }
   pinMode(LED_PIN, OUTPUT);
   
-  if(ENABLE_LEDS){
-    led_setup();
+  if(ENABLE_KEEPON){
+    digitalWrite(LED_PIN, HIGH);
+    keepon_setup();
+    digitalWrite(LED_PIN, LOW);
   }
+  led_setup();
+  
 }
 
 void loop(){
-  if(ENABLE_LEDS){
-    taLEDAction.check();
-  }
+  taLEDAction.check();
   nh.spinOnce();
   delay(1);
 }
@@ -232,7 +230,6 @@ void led_act_turncorner(){
 }
 
 void led_act_obstacle(){
-  led_color_strip(LED_COLOR_NONE);
   led_draw_spot(led_state_obstacle_angle, led_state_color2);
   if(led_state_obstacle_index >= strip.numPixels()/2 -1){
     led_state_obstacle_index = 0;
@@ -240,8 +237,8 @@ void led_act_obstacle(){
   
   strip.setPixelColor((LED_ZERO_OFFSET + (led_state_obstacle_angle + strip.numPixels()/2) + led_state_obstacle_index)%strip.numPixels(), led_state_color1);
   strip.setPixelColor((LED_ZERO_OFFSET + (led_state_obstacle_angle + strip.numPixels()/2) - led_state_obstacle_index)%strip.numPixels(), led_state_color1);
-  strip.setPixelColor((LED_ZERO_OFFSET + (led_state_obstacle_angle + strip.numPixels()/2) + led_state_obstacle_index - 1)%strip.numPixels(), led_state_color1);
-  strip.setPixelColor((LED_ZERO_OFFSET + (led_state_obstacle_angle + strip.numPixels()/2) - led_state_obstacle_index + 1)%strip.numPixels(), led_state_color1);
+  strip.setPixelColor((LED_ZERO_OFFSET + (led_state_obstacle_angle + strip.numPixels()/2) + led_state_obstacle_index - 1)%strip.numPixels(), LED_COLOR_NONE);
+  strip.setPixelColor((LED_ZERO_OFFSET + (led_state_obstacle_angle + strip.numPixels()/2) - led_state_obstacle_index + 1)%strip.numPixels(), LED_COLOR_NONE);
   led_state_obstacle_index++;
   strip.show();
 }
@@ -279,7 +276,7 @@ void led_state_changed(){
     }
     led_state_obstacle_angle = led_obstacle_direction_for_angle(led_state_obstacle_angle);
     led_state_obstacle_index = 0;
-    taLEDAction.setInterval(1000/strip.numPixels());
+    taLEDAction.setInterval(20);
   }else if(led_state_as_int == LED_STATE_BRAKE){
     LOG("Brake");
     int leftTailBlinkerIndex = (strip.numPixels()*3/8 + LED_ZERO_OFFSET)%strip.numPixels();
@@ -297,7 +294,7 @@ void led_state_changed(){
     led_state_none_g = (led_state_color1 >> 16) | 0x80;
     led_state_none_r = (led_state_color1 >> 8) | 0x80;
     led_state_none_b = led_state_color1 | 0x80;
-    taLEDAction.setInterval(500/127);
+    taLEDAction.setInterval(1000/127);
   }
 }
 
