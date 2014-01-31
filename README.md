@@ -31,12 +31,20 @@ This repo contains the following:
 
 # Usage
 
-1) Upload the sketch and connect LED and Keepon
-2) 
-2) Set up ROS fuerte workspace
+1) Include the `TimedAction` and `ros_lib` libraries and upload the sketch and connect LED and Keepon
+
+2) Use files in `led_keepon_ws` to set up a ROS fuerte package
+
 3) Launch ROS core - `roscore`
+
 4) Launch ROS API - `rosrun rosapi rosapi.py`
-5) Launch ROS bridge - `rosrun rosbridge_server 
-6) Launch ROS serial - 
+
+5) Launch ROS bridge - `roslaunch rosbridge_server rosbridge_websocket.launch` (if it doesn't work, you may not need to use `rosrun rosapi rosapi.py`)
+
+6) Launch ROS serial - `rosrun rosserial_python serial_node.py /dev/ttyUSB0` (change according to the port Arduino is plugged into)
+
+7) Open `web_interface/subscriber.html` in your browser
+
+8) Trigger scenarios either with `web_interface/publisher.html` or `web_interface/scenario_publisher.py`
 
 
